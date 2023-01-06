@@ -4,4 +4,4 @@
 # SPDX-License-Identifier: MIT-0
 
 rm -f report.html
-./report_generator -log-file=log.json
+./reports/report_generator -log-file=log.json
