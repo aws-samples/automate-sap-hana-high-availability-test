@@ -43,9 +43,6 @@ pipeline {
         HANA_INSTANCE_NUMBER = credentials("HANA_INSTANCE_NUMBER")
         ASCS_INSTANCE_NUMBER = credentials("ASCS_INSTANCE_NUMBER")
         PAS_INSTANCE_NUMBER = credentials("PAS_INSTANCE_NUMBER")
-        MASTER_PASSWORD = credentials("MASTER_PASSWORD")
-        SAP_SID = credentials("SAP_SID")
-        HANA_SID = credentials("HANA_SID")
         
         // Credentials to CD in and out
         TERRAFORM_FOLDER_NAME="terraform-aws-sap-netweaver-on-hana"
