@@ -6,4 +6,4 @@
 cd reports
 
 rm -f report.html
-./report_generator_linux_amd64 -log-file=log.json
+./report_generator_linux_amd64 -log-file=../log.json
