@@ -74,7 +74,7 @@ ANSIBLE_BECOME_EXE="sudo su -"
 
 rm -f log.json
 
-ansible-playbook $ansibleHanaDir/main.yml \
+ansible-playbook $ansibleHanaDir/main.yaml \
                     --inventory-file "$hostsFile" \
                     --extra-vars "@$VAR_FILE_FULL_PATH"
 
