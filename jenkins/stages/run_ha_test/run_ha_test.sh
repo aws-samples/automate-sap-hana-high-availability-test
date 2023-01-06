@@ -88,4 +88,10 @@ elif [[ $result_value != 0 ]]; then
     exit 111
 fi
 
+location=$(PWD)
+cd reports
+./report_generator -log-file=$location/log.json
+open report.html
+cd ..
+
 exit 0
