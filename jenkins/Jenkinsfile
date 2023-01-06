@@ -107,6 +107,10 @@ pipeline {
                     // Ansible for installing Hana
                     sh '''
                         git clone https://github.com/aws-samples/terraform-aws-sap-netweaver-on-hana.git
+                        $STAGES_FOLDER/create_env/init_terraform.sh
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi
 
                         $STAGES_FOLDER/run_ha_test/run_ha_test.sh
                         if [ $? -gt 0 ]; then
