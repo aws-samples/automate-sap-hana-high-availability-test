@@ -1,0 +1,163 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check inputs
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-check-inputs
+      vars:
+        input_variables_to_check: 
+          - INPUT_HANA_SID
+          - INPUT_HANA_INSTANCE_NUMBER
+          - INPUT_ASCS_SID
+          - INPUT_ASCS_INSTANCE_NUMBER
+          - INPUT_PAS_SID
+          - INPUT_PAS_INSTANCE_NUMBER
+          - INPUT_AWS_REGION
+          - INPUT_PRIVATE_SSH_KEY
+        non_mandatory_input_variables_to_check:
+          - INPUT_SYSTEM_USER
+          - INPUT_SYSTEM_PASSWORD
+          - INPUT_CHECK_R3_TRANS
+          - INPUT_AWS_CLI_PROFILE
+          - INPUT_EC2_USER
+          - INPUT_SSH_PORT
+          - INPUT_SSH_CONNECTION
+          - INPUT_SSH_COMMON_ARGS
+
+- name: Check current HA installation (prep / bridge tasks)
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+
+- name: Stop Primary database with HDB Stop and check failover result
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "HDB_STOP"
+        STOP_PRIMARY: true
+
+- name: Stop NEW Primary database with HDB Stop and check failover result
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "HDB_STOP"
+        STOP_PRIMARY: true
+    
+- name: Stop Secondary database with HDB Stop and check result
+  become: true
+  hosts: all
+  roles:    
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "HDB_STOP"
+        STOP_SECONDARY: true
+    
+- name: Stop Primary database with PCS Node Standby and check result
+  become: true
+  hosts: all
+  roles:    
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "PCS_NODE_STANDBY"
+
+- name: Stop NEW Primary database with PCS Node Standby and check result
+  become: true
+  hosts: all
+  roles:    
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "PCS_NODE_STANDBY"
+
+- name: Stop Primary database with KILL PID and check result
+  become: true
+  hosts: all
+  roles:    
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "KILL_PID"
+
+- name: Stop Primary database with "echo 'b' > /proc/sysrq-trigger" and check result
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "CRASH_NODE_PROC_PRE"
+
+- name: Run POST ACTIONS for scenario CRASH_NODE_PROC_PRE
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "CRASH_NODE_PROC_POST"
+
+- name: Stop Secondary database with "echo 'b' > /proc/sysrq-trigger" and check result
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "CRASH_NODE_PROC_PRE"
+
+- name: Run POST ACTIONS for scenario CRASH_NODE_PROC_PRE
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "CRASH_NODE_PROC_POST"
+
+- name: Stop Primary database with HDB KILL -9 and check result
+  become: true
+  hosts: all
+  roles:    
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "HDB_KILL_9"
+
+- name: Stop Secondary database with HDB KILL -9 and check result
+  become: true
+  hosts: all
+  roles:    
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "HDB_KILL_9"
+
+- name: Reboot Primary database and check result
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "REBOOT"
+
+- name: Reboot NEW Primary database and check result
+  become: true
+  hosts: all
+  roles:
+    - role: ansible-role-bridge-task
+    - role: ansible-role-ha-test-scenarios
+      vars:
+        HA_TEST_SCENARIO: "REBOOT"

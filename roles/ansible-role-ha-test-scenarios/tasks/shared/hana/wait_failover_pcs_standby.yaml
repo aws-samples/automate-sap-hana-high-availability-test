@@ -1,0 +1,16 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for SECONDARY to be {{ crm_mon_promoted }}
+  include_tasks: wait/wait_secondary_be_promoted.yaml
+
+- name: Wait for PRIMARY to be {{ crm_mon_undefined }}
+  include_tasks: wait/wait_primary_be_undefined.yaml
+
+- name: Wait for SECONDARY to be {{ crm_mon_prim }}
+  include_tasks: wait/wait_secondary_be_prim.yaml
+
+- name: Wait for PRIMARY to be {{ crm_mon_sfail }}
+  include_tasks: wait/wait_primary_be_sfail.yaml

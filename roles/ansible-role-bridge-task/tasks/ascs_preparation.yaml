@@ -1,0 +1,7 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get current SAP ASCS queue length
+  include_tasks: ascs/get_ascs_queue_length.yaml

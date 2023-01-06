@@ -1,0 +1,13 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get instances information from AWS
+  amazon.aws.ec2_metadata_facts:
+  register: aws_info
+
+- name: Save instance ID of node to be crashed
+  set_fact: GLOBAL_CRASH_NODE_INSTANCE_ID="{{ item.value.aws_info.ansible_facts.ansible_ec2_instance_id }}"
+  when: item.value.GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  loop: "{{ hostvars | dict2items }}"

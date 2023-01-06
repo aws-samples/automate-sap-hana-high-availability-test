@@ -1,0 +1,36 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check HA configuration status
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }} && echo "{{ IGNORE_ERRORS }}"
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  register: output_before
+  ignore_errors: true
+
+- name: System is not ready for HA testing
+  debug:
+    msg: "An ERROR was found while checking for current HANA installation. Starting now some self-healing actions"
+  when: mode_unknown in output_before.stdout
+
+- block:
+    - name: Wait for replication to be active before triggering self-healing actions
+      shell: |
+          source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }}
+      become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+      register: output_before
+      failed_when: overall_system_replication_status_syncing in output_before.stdout
+      when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+      retries: "{{ GLOBAL_RETRY_TIME }}"
+      delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+      until: overall_system_replication_status_active in output_before.stdout
+  rescue:
+    - name: Sync not established error
+      debug:
+        msg: "Sync not established error. Now trying self-healing actions"
+
+    - name: Starting HANA backup
+      include_tasks: hana/hana_backup/backup_hana.yaml
+      when: output_before.rc != 15 and GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""

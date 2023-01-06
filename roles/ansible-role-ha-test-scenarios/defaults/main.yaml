@@ -1,0 +1,46 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+IGNORE_ERRORS: "ignore_errors"
+
+# Role variables
+LOCAL_STOP_PRIMARY: "{{ STOP_PRIMARY | default('false') }}"
+LOCAL_STOP_SECONDARY: "{{ STOP_SECONDARY | default('false') }}"
+
+# CRM_MON commands
+crm_mon_command: "crm_mon -A1 --output-as text | sed -n {{ regex_sed_filter_crm_mon }} | head -n 12"
+crm_mon_command_all: "crm_mon -A1 --output-as text"
+crm_mon_command_cust_host: "crm_mon -A1 --output-as text | sed -n {{ regex_sed_filter_crm_mon_cust_host }} | head -n 12"
+
+# Regex
+regex_sed_filter_crm_mon: "'/Node: {{ ansible_hostname }}/,$p'"
+regex_sed_filter_crm_mon_cust_host: "'/Node: {{ custom_hostname }}/,$p'"
+
+# Crash instance command
+crash_command: "echo 'b' > /proc/sysrq-trigger"
+
+# Variables to compare crm_mon output
+mode_primary_string: "mode: PRIMARY"
+mode_secondary_string: "mode: SYNC"
+mode_unknown: "UNKNOWN"
+mode_syncing: "SYNCING"
+service_name_indexserver: "indexserver"
+crm_mon_promoted: "PROMOTED"
+crm_mon_demoted: "DEMOTED"
+crm_mon_undefined: "UNDEFINED"
+crm_mon_prim: "PRIM"
+crm_mon_sok: "SOK"
+crm_mon_sfail: "SFAIL"
+crm_mon_master_name: master-SAPHana_{{ GLOBAL_HANA_SID }}_{{ GLOBAL_HANA_INSTANCE_NUMBER }}
+
+# Debugging messages
+msg_starting_scenario: |
+  "------------------------------------------------------"
+  "STARTING TEST SCENARIO: {{ HA_TEST_SCENARIO }}"
+  "------------------------------------------------------"
+msg_finished_scenario: |
+  "------------------------------------------------------"
+  "FINISHED TEST SCENARIO: {{ HA_TEST_SCENARIO }}"
+  "------------------------------------------------------"

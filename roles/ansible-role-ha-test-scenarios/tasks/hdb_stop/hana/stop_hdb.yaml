@@ -1,0 +1,10 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Stop HANA database
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; HDB stop
+  become: true
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"

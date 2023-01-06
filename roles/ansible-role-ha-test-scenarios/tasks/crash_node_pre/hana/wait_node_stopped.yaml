@@ -1,0 +1,15 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for instance {{ GLOBAL_CRASH_NODE_INSTANCE_ID }} to be in stopped state
+  amazon.aws.ec2_instance_info:
+    instance_ids: "{{ GLOBAL_CRASH_NODE_INSTANCE_ID }}"
+    aws_region: "{{ GLOBAL_AWS_REGION }}"
+  register: aws_ec2_status
+  failed_when: aws_ec2_status.instances[0].state.name != "stopped"
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: aws_ec2_status.instances[0].state.name == "stopped"
+  any_errors_fatal: true

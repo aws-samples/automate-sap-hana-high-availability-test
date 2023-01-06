@@ -1,0 +1,156 @@
+pipeline {
+    // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    // SPDX-License-Identifier: MIT-0
+
+    agent any
+
+    options {
+        disableConcurrentBuilds()
+    }
+    environment {
+        // Credentials for AWS
+        AWS_ACCOUNT_CREDENTIALS = credentials("AWS_ACCOUNT_CREDENTIALS")
+        AWS_REGION = credentials("AWS_REGION")
+       
+        // Credentials for Ansible
+        SSH_KEYPAIR_NAME = credentials("SSH_KEYPAIR_NAME")
+        SSH_KEYPAIR_FILE = credentials("SSH_KEYPAIR_FILE")
+        
+        // Credentials for running HA
+        HANA_INSTANCE_NUMBER = credentials("HANA_INSTANCE_NUMBER")
+        ASCS_INSTANCE_NUMBER = credentials("ASCS_INSTANCE_NUMBER")
+        PAS_INSTANCE_NUMBER = credentials("PAS_INSTANCE_NUMBER")
+        MASTER_PASSWORD = credentials("MASTER_PASSWORD")
+        SAP_SID = credentials("SAP_SID")
+        HANA_SID = credentials("HANA_SID")
+        
+        // Credentials to CD in and out
+        TERRAFORM_FOLDER_NAME="terraform-aws-sap-netweaver-on-hana"
+    }
+
+    stages {
+        stage('Prepare'){
+            steps {
+                script {
+                    // -------------------------------------------------
+                    // Check credentials
+                    // -------------------------------------------------
+                    env.STAGES_FOLDER="./jenkins/stages"
+                    env.PREPARE_FOLDER=STAGES_FOLDER+"/prepare"
+                    env.DEPENDENCIES_FOLDER=PREPARE_FOLDER+"/dependencies"
+                    env.GLOBAL_VARS_PATH=PREPARE_FOLDER+"/check_global_variables"
+
+                    // Credentials for AWS
+                    sh(script: GLOBAL_VARS_PATH+'/check_AWS_ACCOUNT_CREDENTIALS.sh', returnStdout: false)
+                    env.AWS_REGION_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_AWS_REGION.sh', returnStdout: true).trim()
+                    env.CLI_PROFILE_CHKD = "sapinstall"
+                    
+                    // Credentials for Ansible
+                    env.SSH_KEYPAIR_NAME_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_SSH_KEYPAIR_NAME.sh', returnStdout: true).trim()
+                    env.SSH_KEYPAIR_FILE_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_SSH_KEYPAIR_FILE.sh', returnStdout: true).trim()
+
+                    // Credentials for running HA
+                    env.HANA_INSTANCE_NUMBER_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_INSTANCE_NUMBER_HANA.sh', returnStdout: true).trim()
+                    env.ASCS_INSTANCE_NUMBER_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_INSTANCE_NUMBER_ASCS.sh', returnStdout: true).trim()
+                    env.PAS_INSTANCE_NUMBER_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_INSTANCE_NUMBER_PAS.sh', returnStdout: true).trim()
+                    env.MASTER_PASSWORD_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_MASTER_PASSWORD.sh', returnStdout: true).trim()
+                    env.SAP_SID_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_SID_SAP.sh', returnStdout: true).trim()
+                    env.HANA_SID_CHKD = sh(script: GLOBAL_VARS_PATH+'/check_SID_HANA.sh', returnStdout: true).trim()
+                    
+                    // -------------------------------------------------
+                    // Configure AWS CLI
+                    // -------------------------------------------------
+                    sh '''
+                        $PREPARE_FOLDER/common/configure_cli.sh
+
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi
+                    '''
+                    env.BUCKET_NAME_CHKD = sh(script: PREPARE_FOLDER+'/check_aws_resources/check_s3_bucket_name.sh', returnStdout: true).trim()
+                    
+                    // -------------------------------------------------
+                    // Check if user information is valid on AWS
+                    // -------------------------------------------------
+                    sh '''
+                        $PREPARE_FOLDER/check_aws_resources/check_user_info.sh
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi
+                    '''
+
+                    // -------------------------------------------------
+                    // Prepare shared roles
+                    // -------------------------------------------------
+                    sh '''
+                        $DEPENDENCIES_FOLDER/install_galaxy_dependencies.sh
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi
+                    '''
+
+                    // Check if there's an available bucket on S3 and DynamoDB table to store Terraform states. If not, creates it
+                    sh '''
+                        $STAGES_FOLDER/env_states/check_create_env_dependencies.sh
+
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi
+                    '''
+                }
+            }
+        }
+        stage('Run HA test'){
+            steps {
+                script {
+                    // Terraform infrastructure
+                    sh '''
+                        rm -rf $TERRAFORM_FOLDER_NAME
+                        git clone https://github.com/aws-samples/terraform-aws-sap-netweaver-on-hana.git
+                        
+                        $STAGES_FOLDER/create_env/run_terraform.sh
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi
+                    '''
+                }
+            }
+        }
+        stage('Run HA test'){
+            options {timeout(time: 2, unit: 'HOURS')}
+            steps {
+                script {
+                    // Ansible for installing Hana
+                    sh '''
+                        $STAGES_FOLDER/run_ha_test/run_ha_test.sh
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi 
+                    '''
+                }
+            }
+        }
+        stage('Generate report'){
+            options {timeout(time: 2, unit: 'HOURS')}
+            steps {
+                script {
+                    // Ansible for installing PAS
+                    sh '''
+                        $STAGES_FOLDER/run_ha_test/generate_report.sh
+                        if [ $? -gt 0 ]; then
+                            exit 1
+                        fi 
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        unsuccessful {
+            echo 'Error'
+        }
+        success {
+            echo 'Write everything to a file and store it to the S3 bucket'
+        }
+    }
+}

@@ -1,0 +1,13 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get Enqueue lock number
+  shell: |
+      source {{ GLOBAL_ASCS_SAPENV_CUSTOM_PATH }} && sapcontrol -nr {{ GLOBAL_ASCS_INSTANCE_NUMBER }} -function EnqGetStatistic | grep locks_now: | grep -Eo '[0-9]'
+  become_user: "{{ GLOBAL_ASCS_SID_ADM_USER }}"
+  register: output
+
+- name: Save ASCS enqueue count to compare after cut
+  set_fact: GLOBAL_ASCS_ENQUEUE_COUNT_PRE="{{ output.stdout }}"

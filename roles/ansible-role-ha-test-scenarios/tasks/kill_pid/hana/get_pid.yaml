@@ -1,0 +1,21 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get index server index
+  shell: | 
+    source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; {{ get_indexserver_index_command }}
+  register: index_server_index
+  become: true
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+
+- name: Set fact with index
+  set_fact: index_server_index_fact={{ index_server_index.stdout }}
+
+- name: Get IndexServer PID
+  shell: |
+    source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; {{ get_indexserver_pid_command }}
+  register: indexserver_pid
+  become: true
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"

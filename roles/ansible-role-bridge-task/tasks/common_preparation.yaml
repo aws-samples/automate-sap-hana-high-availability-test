@@ -1,0 +1,16 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Make sure custom .sapenv.sh file exists
+  include_tasks: hana/check_custom_sapenv.yaml
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+
+- name: Make sure custom .sapenv.sh file exists
+  include_tasks: ascs/check_custom_sapenv.yaml
+  when: GLOBAL_ASCS_GROUP_NAME in group_names
+
+- name: Make sure custom .sapenv.sh file exists
+  include_tasks: pas/check_custom_sapenv.yaml
+  when: GLOBAL_CHECK_R3_TRANS == true and GLOBAL_PAS_GROUP_NAME in group_names

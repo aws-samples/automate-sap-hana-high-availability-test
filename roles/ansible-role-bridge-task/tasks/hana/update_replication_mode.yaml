@@ -1,0 +1,13 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Update replication mode to be {{ GLOBAL_HANA_SYNC_MODE | upper }}
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && hdbnsutil -sr_changemode --mode={{ GLOBAL_HANA_SYNC_MODE }}
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  register: output
+
+- name: Check replication mode again after update
+  include_tasks: hana/check_replication_mode.yaml

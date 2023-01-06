@@ -1,0 +1,27 @@
+<!-- 
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    SPDX-License-Identifier: MIT-0 
+-->
+
+{{ define "details_row_less_important" }}
+            <details>
+                <summary class="summary-less-important">Common Steps</summary>
+                    {{ range .LESS_IMPORTANT_DETAILS_ROWS }}
+                    <details>
+                        {{ if eq "true" .FAILED }}
+                            <summary class="summary-less-important failed">{{ .DETAILS.NAME }}</summary>
+                        {{ else }}
+                            <summary class="summary-less-important">{{ .DETAILS.NAME }}</summary>
+                        {{ end }}
+                        <!-- <summary class="summary-less-important">{{ .DETAILS.NAME }}</summary>                                 -->
+                        <table>
+                            <tr>
+                                <td scope="row" class="col-sm-2 td-background">{{ .TIMESTAMP }}</td>
+                                <td scope="row" class="col-sm-2 td-background">{{ .SCENARIO }}</td>
+                                <td scope="row" class="col-sm-8 td-background">{{ template "message_cell" .DETAILS }}</td>
+                            </tr>
+                        </table>
+                    </details>
+                    {{ end }} 
+            </details>
+{{ end }}

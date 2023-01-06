@@ -1,0 +1,23 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check if custom sapenv.sh exists
+  stat:
+    path: "{{ GLOBAL_PAS_SAPENV_CUSTOM_PATH }}"
+  register: custom_sapenv_stats
+
+- name: Create copy of original .sapenv.sh file
+  copy:
+    src: "{{ sapenv_pas_original_path }}"
+    dest: "{{ GLOBAL_PAS_SAPENV_CUSTOM_PATH }}"
+    remote_src: yes
+  when: custom_sapenv_stats.stat.exists is false
+
+- name: Remove all "tset" statements from the file. PS! This is important when calling Ansible from Jenkins
+  lineinfile:
+    path: "{{ GLOBAL_PAS_SAPENV_CUSTOM_PATH }}"
+    state: absent
+    regexp: "tset -I -Q"
+  when: custom_sapenv_stats.stat.exists is false

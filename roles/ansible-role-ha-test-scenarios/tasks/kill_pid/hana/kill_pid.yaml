@@ -1,0 +1,16 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get PIDs
+  include_tasks: get_pid.yaml
+
+- name: Kill IndexServer on PRIMARY host
+  shell: kill -9 {{ indexserver_pid.stdout }}
+
+- name: Wait for process to be replaced and get {{ process_green_status }}
+  include_tasks: wait_process_get_green.yaml
+
+- name: Include counter checker
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait/wait_prim_counter_bigger_than_sec.yaml"

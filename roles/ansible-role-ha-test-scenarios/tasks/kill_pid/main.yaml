@@ -1,0 +1,16 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Include custom KILL PID vars
+  include_vars:
+    file: kill_pid.yaml
+
+- name: Include Kill PID process for PRIMARY
+  include_tasks: "hana/kill_pid.yaml"
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+
+- name: Include Kill PID process SECONDARY
+  include_tasks: "hana/kill_pid.yaml"
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""

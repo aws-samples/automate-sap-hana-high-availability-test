@@ -1,0 +1,29 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check if user {{ GLOBAL_HANA_SYSTEM_USER }} exists
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; {{ hdbuserstore_path }} list
+  register: users_list
+  become: yes
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+
+- name: Fail when user doesn't exist
+  fail:
+    msg: "User {{ GLOBAL_HANA_SYSTEM_USER }} doesn't exist. Please check your input and try again"
+  when: not user_message_hdbuserstore in users_list.stdout
+  any_errors_fatal: true
+
+- name: Check if the user has permission to access the database
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && \
+      {{ hdbsql_path }} -i {{ GLOBAL_HANA_INSTANCE_NUMBER }} -u {{ GLOBAL_HANA_SYSTEM_USER }} -p {{ GLOBAL_HANA_SYSTEM_PASSWORD }} -d SYSTEMDB -m SELECT 1 from users
+  register: query_check
+
+- name: Fail when user doesn't have permissions
+  fail:
+    msg: "User {{ GLOBAL_HANA_SYSTEM_USER }} doesn't have permissions to run queries on the database. The command tried was \"{{ hdbsql_path }} -i {{ GLOBAL_HANA_INSTANCE_NUMBER }} -u {{ GLOBAL_HANA_SYSTEM_USER }} -p PASSWORD_HERE -d SYSTEMDB -m SELECT 1 from users\". Please check your user permissions and try again"
+  when: query_check.rc != 0
+  any_errors_fatal: true

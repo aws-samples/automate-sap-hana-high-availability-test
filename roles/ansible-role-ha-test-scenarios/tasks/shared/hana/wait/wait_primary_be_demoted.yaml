@@ -1,0 +1,14 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for PRIMARY to be {{ crm_mon_demoted }}
+  shell: "{{ crm_mon_command }} | grep {{ crm_mon_demoted }}"
+  register: primary_output
+  failed_when: primary_output.rc != 0
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: primary_output.rc == 0
+  any_errors_fatal: true

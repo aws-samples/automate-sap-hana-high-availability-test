@@ -1,0 +1,22 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check if HANA is fully up
+  include_tasks: "{{ playbook_dir }}/roles/ansible-role-ha-test-scenarios/tasks/shared/hana/wait/wait_hana_be_fully_up.yaml"
+
+- name: Register which node is Primary and Secondary for HANA
+  include_tasks: hana/check_node_prim_sec.yaml
+
+- name: Check HA config status
+  include_tasks: hana/check_ha_current_status.yaml
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+
+- name: Check the current replication and overall system status
+  include_tasks: hana/check_system_status.yaml
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+
+- name: Check if replication mode is {{ GLOBAL_HANA_SYNC_MODE }}
+  include_tasks: hana/check_replication_mode.yaml
+  when: GLOBAL_HANA_GROUP_NAME in group_names

@@ -1,0 +1,13 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for primary to be demoted
+  include_tasks: wait/wait_primary_be_demoted.yaml
+
+- name: Wait for primary to be SOK
+  include_tasks: wait/wait_primary_be_sok.yaml
+
+- name: Wait for counter of SECONDARY be bigger than PRIMARY
+  include_tasks: wait/wait_prim_counter_bigger_than_sec.yaml

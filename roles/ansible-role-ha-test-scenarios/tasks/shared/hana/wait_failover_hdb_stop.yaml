@@ -1,0 +1,19 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for SECONDARY to be {{ crm_mon_promoted }}
+  include_tasks: wait/wait_secondary_be_promoted.yaml
+
+- name: Wait for PRIMARY to be {{ crm_mon_demoted }}
+  include_tasks: wait/wait_primary_be_demoted.yaml
+
+- name: Wait for SECONDARY to be {{ crm_mon_prim }}
+  include_tasks: wait/wait_secondary_be_prim.yaml
+
+- name: Wait for PRIMARY to be {{ crm_mon_sok }}
+  include_tasks: wait/wait_primary_be_sok.yaml
+  
+- name: Include counter checker
+  include_tasks: wait/wait_sec_counter_bigger_than_prim.yaml

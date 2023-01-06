@@ -1,0 +1,12 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+process_list_function_name: GetProcessList
+
+get_indexserver_index_command: sapcontrol -nr {{ GLOBAL_HANA_INSTANCE_NUMBER }} -function {{ process_list_function_name }} -format script | grep hdbindexserver | awk '{print $1}'
+get_indexserver_pid_command: sapcontrol -nr {{ GLOBAL_HANA_INSTANCE_NUMBER }} -function {{ process_list_function_name }} -format script | grep "{{ index_server_index_fact | default('0') }} pid:" | awk '{print $3}'
+get_indexserver_status_command: status=$(sapcontrol -nr {{ GLOBAL_HANA_INSTANCE_NUMBER }} -function {{ process_list_function_name }} -format script | grep "{{ index_server_index_fact | default('0') }} dispstatus:" | awk '{print $3}'); if [[ "$status" == "{{ process_green_status }}" ]]; then exit 0; else exit 1; fi
+
+process_green_status: GREEN

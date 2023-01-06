@@ -1,0 +1,23 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: PCS Node Unstanbdy
+  shell: pcs node unstandby {{ ansible_hostname }}
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+
+- name: Wait for HA configuration to get back after self-healing actions
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }}
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  register: ha_output
+  failed_when: mode_unknown in ha_output.stdout or mode_syncing in ha_output.stdout or not service_name_indexserver in ha_output.stdout
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: not mode_unknown in ha_output.stdout and not mode_syncing in ha_output.stdout and service_name_indexserver in ha_output.stdout
+  any_errors_fatal: true
+
+- name: Include counter checker
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait/wait_sec_counter_bigger_than_prim.yaml"

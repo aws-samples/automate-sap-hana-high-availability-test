@@ -1,0 +1,19 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: HDB kill -9
+  shell: | 
+    source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; HDB kill -9
+  become: true
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+
+- name: Wait for failover to happen
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait_failover_hdb_stop.yaml"
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+
+- name: Check SAP ASCS queue length
+  include_tasks: "{{ role_path }}/tasks/shared/ascs/compare_queue_length.yaml"
+  when: GLOBAL_ASCS_GROUP_NAME in group_names

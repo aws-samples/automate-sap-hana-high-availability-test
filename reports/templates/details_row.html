@@ -1,0 +1,19 @@
+<!-- 
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    SPDX-License-Identifier: MIT-0 
+-->
+
+{{ define "details_row" }}
+                {{ range .DETAILS_ROWS }}
+
+                    {{ if .LESS_IMPORTANT_DETAILS_ROWS }}
+
+                        {{ template "details_row_less_important" . }}
+
+                    {{ else }}
+                    
+                        {{ template "details_row_important" . }}
+
+                    {{ end }}
+                {{ end }} 
+{{ end }}

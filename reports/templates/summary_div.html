@@ -1,0 +1,34 @@
+<!-- 
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    SPDX-License-Identifier: MIT-0 
+-->
+
+    {{ define "summary_div" }}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-success">
+                            Successful Executions<span class="badge badge-success">{{ .SUCCESSFUL_COUNT }}</span>
+                        </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-danger">
+                            Failed Executions <span class="badge badge-danger">{{ .FAILED_COUNT }}</span>
+                        </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    </div>
+    {{ end }}

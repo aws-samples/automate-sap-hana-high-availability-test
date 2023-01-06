@@ -1,0 +1,31 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+# HANA data
+INPUT_HANA_SID: AD0
+INPUT_HANA_INSTANCE_NUMBER: "00"
+
+INPUT_SYSTEM_USER: SYSTEM
+INPUT_SYSTEM_PASSWORD: P@ssw0rd
+
+INPUT_HANA_SYNC_MODE: "SYNC"
+
+# ASCS data
+INPUT_ASCS_SID: AD0
+INPUT_ASCS_INSTANCE_NUMBER: "00"
+
+# PAS data
+INPUT_PAS_SID: AD0
+INPUT_PAS_INSTANCE_NUMBER: "00"
+INPUT_CHECK_R3_TRANS: true
+
+# AWS data
+INPUT_AWS_REGION: us-east-1
+
+# AWS CLI data
+INPUT_AWS_CLI_PROFILE: default
+
+# Hosts connection data
+INPUT_PRIVATE_SSH_KEY: /my/path/to/pemFile.pem

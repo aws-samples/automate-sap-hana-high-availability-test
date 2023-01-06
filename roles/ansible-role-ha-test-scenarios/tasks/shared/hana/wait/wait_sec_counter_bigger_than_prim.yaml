@@ -1,0 +1,27 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get secondary hostname
+  set_fact: custom_hostname="{{ GLOBAL_SECONDARY_PUBLIC_HOSTNAME }}"
+
+# What the command below is doing is:
+#
+# Gets count for the new PRIMARY: 
+#      prim_count=$(crm_mon -A1 --output-as text | sed -n '/Node: demo-hana2/,$p' | head -n 12 | tail -1 | sed 's/^.*://');
+#
+# Gets count for the new SECONDARY: 
+#      sec_count=$(crm_mon -A1 --output-as text | sed -n '/Node: demo-hana/,$p' | head -n 12 | tail -1 | sed 's/^.*://');
+#
+# Compares it and return error or success: 
+#      if (( $prim_count > $sec_count )); then exit 0; else exit 1; fi
+- name: Wait for counter of SECONDARY be bigger than PRIMARY
+  shell: "prim_count=$({{ crm_mon_command_cust_host }} | tail -1 | sed 's/^.*://'); sec_count=$({{ crm_mon_command }} | tail -1 | sed 's/^.*://'); if (( $prim_count > $sec_count )); then exit 0; else exit 1; fi"
+  register: secondary_output
+  failed_when: secondary_output.rc != 0
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: secondary_output.rc == 0
+  any_errors_fatal: true

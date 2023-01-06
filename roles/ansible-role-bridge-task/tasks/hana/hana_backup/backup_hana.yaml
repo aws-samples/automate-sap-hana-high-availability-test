@@ -1,0 +1,36 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Ensure Hana database is started
+  include_tasks: "hana/hana_backup/start_hana.yaml"
+
+- name: Check DB user
+  include_tasks: "hana/hana_backup/check_db_user.yaml"
+
+- name: Ensure backup folder {{ backup_folder_path }} exists
+  file:
+    path: "{{ backup_folder_path }}"
+    state: directory
+    mode: 0777
+
+- name: Ensure a backup exists for SYSTEM. If it doesn't, backing up now...
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && \
+      {{ hdbsql_path }} -i {{ GLOBAL_HANA_INSTANCE_NUMBER }} -u {{ GLOBAL_HANA_SYSTEM_USER }} -p {{ GLOBAL_HANA_SYSTEM_PASSWORD }} -d SYSTEMDB -m \
+      "BACKUP DATA USING FILE ('system_backup')"
+  register: sys_bkp_result
+  retries: 10
+  delay: 5
+  until: sys_bkp_result.rc == 0
+
+- name: Ensure a backup exists for {{ GLOBAL_HANA_SID }}. If it doesn't, backing up now...
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && \
+      {{ hdbsql_path }} -i {{ GLOBAL_HANA_INSTANCE_NUMBER }} -u {{ GLOBAL_HANA_SYSTEM_USER }} -p {{ GLOBAL_HANA_SYSTEM_PASSWORD }} -d SYSTEMDB -m \
+      "BACKUP DATA FOR {{ GLOBAL_HANA_SID | upper }} USING FILE ('data_bck')"
+  register: sid_bkp_result
+  retries: 10
+  delay: 5
+  until: sid_bkp_result.rc == 0

@@ -1,0 +1,47 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Fail if test scenario is not specified
+  fail:
+    msg: "No test scenario was provided with variable HA_TEST_SCENARIO. Fill the variable in and try again"
+  when: HA_TEST_SCENARIO is undefined
+
+- name: Show current step
+  debug:
+    msg: "{{ msg_starting_scenario.split('\n') }}"
+  run_once: true
+
+- name: Run test for "HDB Stop" scenario
+  include_tasks: hdb_stop/main.yaml
+  when: HA_TEST_SCENARIO == "HDB_STOP"
+
+- name: Run test for "PCS Node Standby" scenario
+  include_tasks: pcs_node_standby/main.yaml
+  when: HA_TEST_SCENARIO == "PCS_NODE_STANDBY"
+
+- name: Run test for "Kill PID" scenario
+  include_tasks: kill_pid/main.yaml
+  when: HA_TEST_SCENARIO == "KILL_PID"
+
+- name: Run test for "HDB Kill -9" scenario
+  include_tasks: hdb_kill_9/main.yaml
+  when: HA_TEST_SCENARIO == "HDB_KILL_9"
+
+- name: Run test for CRASH_NODE with "echo 'b' > /proc/sysrq-trigger" scenario
+  include_tasks: crash_node_pre/main.yaml
+  when: HA_TEST_SCENARIO == "CRASH_NODE_PROC_PRE"
+
+- name: Run post actions for test "CRASH_NODE" with "echo 'b' > /proc/sysrq-trigger" scenario
+  include_tasks: crash_node_post/main.yaml
+  when: HA_TEST_SCENARIO == "CRASH_NODE_PROC_POST"
+
+- name: Run test for "Reboot" scenario
+  include_tasks: reboot/main.yaml
+  when: HA_TEST_SCENARIO == "REBOOT"
+
+- name: Show current step
+  debug:
+    msg: "{{ msg_finished_scenario.split('\n') }}"
+  run_once: true

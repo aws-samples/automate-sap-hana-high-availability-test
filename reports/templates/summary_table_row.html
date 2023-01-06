@@ -1,0 +1,18 @@
+<!-- 
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    SPDX-License-Identifier: MIT-0 
+-->
+
+{{ define "summary_table_row" }}
+          {{ range .SUMMARY_ROWS }}
+          <tr>
+            <th scope="row">{{ .COUNT }}</th>
+            <td>{{ .NAME }}</td>
+            {{ if eq .RESULT "FAIL" }}
+            <td><a style="color:red; font-weight: bold;" onclick="scrollToSection('{{ .DYNAMIC_ID }}')"><u>{{ .RESULT }}</u></a></td>
+            {{ else }}
+            <td><a style="color:green;" onclick="scrollToSection('{{ .DYNAMIC_ID }}')"><u>{{ .RESULT }}</u></a></td>
+            {{ end }}
+          </tr>
+          {{ end }}
+{{ end }}

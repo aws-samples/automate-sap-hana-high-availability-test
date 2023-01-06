@@ -1,0 +1,28 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Show current step
+  debug:
+    msg: "{{ msg_starting_bridge_task.split('\n') }}"
+  run_once: true
+
+- name: Common preparation steps
+  include_tasks: common_preparation.yaml
+
+- name: Adding HANA preparation steps
+  include_tasks: hana_preparation.yaml
+
+- name: Get current SAP ASCS queue length
+  include_tasks: ascs_preparation.yaml
+  when: GLOBAL_ASCS_GROUP_NAME in group_names
+
+- name: Check if PAS is connected to the primary database
+  include_tasks: pas_preparation.yaml
+  when: GLOBAL_CHECK_R3_TRANS == true and GLOBAL_PAS_GROUP_NAME in group_names
+
+- name: Show current step
+  debug:
+    msg: "{{ msg_finished_bridge_task.split('\n') }}"
+  run_once: true

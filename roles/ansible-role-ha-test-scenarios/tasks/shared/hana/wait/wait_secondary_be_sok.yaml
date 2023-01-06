@@ -1,0 +1,14 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for SECONDARY hana_{{ hana_sid_lower }}_sync_state to be {{ crm_mon_sok }}
+  shell: "{{ crm_mon_command }} | grep {{ crm_mon_sok }}"
+  register: primary_output
+  failed_when: primary_output.rc != 0
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: primary_output.rc == 0
+  any_errors_fatal: true

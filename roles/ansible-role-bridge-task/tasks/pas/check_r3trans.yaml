@@ -1,0 +1,34 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Fail if no primary DB hostname is found in variables
+  fail:
+    msg: "No HANA Primary hostname was found in variable GLOBAL_PRIMARY_PUBLIC_HOSTNAME. Please make sure that HANA preparation (hana_preparation.yaml) ran before this task"
+  when: GLOBAL_PRIMARY_PUBLIC_HOSTNAME is undefined
+  any_errors_fatal: true
+
+- name: Make sure no trans log file exists
+  file:
+    path: "{{ GLOBAL_PAS_R3TRANS_FILE_PATH }}"
+    state: absent
+
+- name: Generate R3trans data
+  shell: |
+      source {{ GLOBAL_PAS_SAPENV_CUSTOM_PATH }}; source {{ GLOBAL_PAS_SAPDBENV_PATH }}; cd {{ GLOBAL_PAS_R3TRANS_FILE_FOLDER }}; R3trans -d && echo "{{ IGNORE_ERRORS }}"
+  become: yes
+  become_user: "{{ GLOBAL_PAS_SID_ADM_USER }}"
+  register: output
+  ignore_errors: yes
+
+- name: Check if PAS is connected to database "{{ GLOBAL_PRIMARY_PUBLIC_HOSTNAME }}"
+  shell: "echo \"{{ IGNORE_ERRORS }}\" && cat {{ GLOBAL_PAS_R3TRANS_FILE_PATH }} | grep \\'{{ GLOBAL_PRIMARY_PUBLIC_HOSTNAME }}\\'"
+  register: r3trans_output
+  ignore_errors: yes
+
+- name: Fail if PAS is not connected to database "{{ GLOBAL_PRIMARY_PUBLIC_HOSTNAME }}"
+  fail:
+    msg: "PAS is not connected to the database it is supposed to be: {{ GLOBAL_PRIMARY_PUBLIC_HOSTNAME }}. Please check and try again"
+  when: r3trans_output.rc != 0
+  any_errors_fatal: true

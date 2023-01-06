@@ -1,0 +1,20 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Put primary node to Standby
+  include_tasks: hana/pcs_node_standby.yaml
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+
+- name: Wait for failover to happen
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait_failover_pcs_standby.yaml"
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+
+- name: Check SAP ASCS queue length
+  include_tasks: "{{ role_path }}/tasks/shared/ascs/compare_queue_length.yaml"
+  when: GLOBAL_ASCS_GROUP_NAME in group_names
+
+- name: Put primary node to Unstandby
+  include_tasks: hana/pcs_node_unstandby.yaml
+  when: GLOBAL_HANA_GROUP_NAME in group_names

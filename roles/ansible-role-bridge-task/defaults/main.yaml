@@ -1,0 +1,69 @@
+---
+ 
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+# Constants to help on the report output
+IGNORE_ERRORS: "ignore_errors"
+
+# Hana installation data
+hana_sid_lower: "{{ GLOBAL_HANA_SID | lower }}"
+
+# Paths to the installation folders and files
+utilities_path: "{{ GLOBAL_HANA_SHARED_FOLDER }}/{{ GLOBAL_HANA_SID }}/exe/linuxx86_64/hdb"
+hdbuserstore_path: "{{ utilities_path }}/hdbuserstore"
+hdbsql_path: "{{ utilities_path }}/hdbsql"
+
+backup_folder_path: /backup/HDB/data
+
+sapenv_original_path: "{{ GLOBAL_HANA_HOME_PATH }}/.sapenv.sh"
+
+# HANA commands
+command_get_process_list: "sapcontrol -nr {{ GLOBAL_HANA_INSTANCE_NUMBER }} -function GetProcessList | grep -c YELLOW" 
+
+# HANA messages
+default_mode_started_hana: "sapstart "
+mode_primary_string: "mode: PRIMARY"
+mode_secondary_string: "mode: SYNC"
+overall_system_replication_status_active: "overall system replication status: ACTIVE"
+overall_system_replication_status_syncing: "overall system replication status: SYNCING"
+mode_unknown: "UNKNOWN"
+crm_mon_promoted: "PROMOTED"
+crm_mon_demoted: "DEMOTED"
+crm_mon_prim: "PRIM"
+crm_mon_sok: "SOK"
+crm_mon_master_name: master-SAPHana_{{ GLOBAL_HANA_SID }}_{{ GLOBAL_HANA_INSTANCE_NUMBER }}
+
+replication_mode_hostname_sync: "Replication mode of {{ ansible_hostname }}: sync"
+replication_mode_hostname_syncmem: "Replication mode of {{ ansible_hostname }}: syncmem"
+sync_replication_mode: "sync"
+syncmem_replication_mode: "syncmem"
+
+user_message_hdbuserstore: "USER: {{ GLOBAL_HANA_SYSTEM_USER }}"
+
+# CRM_MON commands
+crm_mon_command: "crm_mon -A1 --output-as text | sed -n {{ regex_sed_filter_crm_mon }} | head -n 12"
+crm_mon_command_cust_host: "crm_mon -A1 --output-as text | sed -n {{ regex_sed_filter_crm_mon_cust_host }} | head -n 12"
+
+crm_mon_command_grep_sok: "crm_mon -A1 --output-as text | sed -n {{ regex_sed_filter_crm_mon }} | head -n 12 | grep {{ crm_mon_sok }}"
+
+# Regex
+regex_sed_filter_crm_mon: "'/Node: {{ ansible_hostname }}/,$p'"
+regex_sed_filter_crm_mon_cust_host: "'/Node: {{ custom_hostname }}/,$p'"
+
+# ASCS variables
+sapenv_ascs_original_path: "/home/{{ GLOBAL_HANA_SID | lower }}adm/.sapenv.sh"
+ascs_profile_folder_path: "/sapmnt/{{ GLOBAL_HANA_SID | upper }}/profile"
+
+# PAS variables
+sapenv_pas_original_path: "/home/{{ GLOBAL_HANA_SID | lower }}adm/.sapenv.sh"
+
+# Debugging messages
+msg_starting_bridge_task: |
+  "------------------------------------------------------"
+  "STARTING BRIDGE TASK"
+  "------------------------------------------------------"
+msg_finished_bridge_task: |
+  "------------------------------------------------------"
+  "FINISHED BRIDGE TASK"
+  "------------------------------------------------------"

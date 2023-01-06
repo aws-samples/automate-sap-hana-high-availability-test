@@ -1,0 +1,30 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get Enqueue lock number
+  shell: |
+      source {{ GLOBAL_ASCS_SAPENV_CUSTOM_PATH }} && sapcontrol -nr {{ GLOBAL_ASCS_INSTANCE_NUMBER }} -function EnqGetStatistic | grep locks_now: | grep -Eo '[0-9]'
+  become_user: "{{ GLOBAL_ASCS_SID_ADM_USER }}"
+  register: output
+
+- name: Save current ASCS enqueue count
+  set_fact: GLOBAL_ASCS_ENQUEUE_COUNT_POST="{{ output.stdout }}"
+
+- name: Show ASCS enqueue count post cut
+  debug:
+    msg: "{{ GLOBAL_ASCS_ENQUEUE_COUNT_POST }}"
+
+- name: Show ASCS enqueue count pre cut
+  debug:
+    msg: "{{ GLOBAL_ASCS_ENQUEUE_COUNT_PRE }}"
+
+- name: Find ASCS enqueue drift count
+  set_fact: ASCS_ENQUEUE_DRIFT_COUNT="{{ ( GLOBAL_ASCS_ENQUEUE_COUNT_PRE | int ) - ( GLOBAL_ASCS_ENQUEUE_COUNT_POST | int ) }}"
+
+- name: Fail if enqueue count drift is bigger than param {{ GLOBAL_ASCS_MAXIMUM_DRIFT }}
+  fail:
+    msg: "The enqueue count difference PRE and POST cutover is {{ ASCS_ENQUEUE_DRIFT_COUNT }}, which is bigger than the allowed {{ GLOBAL_ASCS_MAXIMUM_DRIFT }}"
+  when: ASCS_ENQUEUE_DRIFT_COUNT > GLOBAL_ASCS_MAXIMUM_DRIFT
+  any_errors_fatal: true

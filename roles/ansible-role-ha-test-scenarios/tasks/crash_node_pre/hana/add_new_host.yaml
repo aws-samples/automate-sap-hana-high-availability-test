@@ -1,0 +1,38 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Gather crashed instance status
+  amazon.aws.ec2_instance_info:
+    instance_ids: "{{ GLOBAL_CRASH_NODE_INSTANCE_ID }}"
+    aws_region: "{{ GLOBAL_AWS_REGION }}"
+  register: aws_ec2_status
+  ignore_errors: yes
+
+- name: Start crashed instance back
+  shell: aws ec2 start-instances --region {{ GLOBAL_AWS_REGION }} --instance-ids {{ GLOBAL_CRASH_NODE_INSTANCE_ID }} {{ GLOBAL_AWS_CLI_PROFILE | ternary('--profile ' + GLOBAL_AWS_CLI_PROFILE, '', omit) }}
+  delegate_to: localhost
+  run_once: yes
+
+- name: Wait for instance to be in running state
+  amazon.aws.ec2_instance_info:
+    instance_ids: "{{ GLOBAL_CRASH_NODE_INSTANCE_ID }}"
+    aws_region: "{{ GLOBAL_AWS_REGION }}"
+  register: updated_status
+  failed_when: updated_status.instances[0].state.name != "running"
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_INSTANCE_START_DELAY }}"
+  until: updated_status.instances[0].state.name == "running"
+  any_errors_fatal: true
+
+- name: Add new instance to hosts group
+  add_host: 
+    hostname: "{{ GLOBAL_PRIMARY_PUBLIC_INVENTORY_HOSTNAME }}-new"
+    ansible_host: "{{ updated_status.instances[0].public_ip_address }}"
+    ansible_user: "{{ GLOBAL_EC2_USER }}"
+    ansible_port: "{{ GLOBAL_SSH_PORT }}"
+    ansible_connection: "{{ GLOBAL_SSH_CONNECTION }}"
+    ansible_ssh_common_args: "{{ GLOBAL_SSH_COMMON_ARGS }}"
+    ansible_ssh_private_key_file: "{{ GLOBAL_SSH_PRIVATE_KEY }}"
+    groups: "{{ GLOBAL_HANA_GROUP_NAME }}"

@@ -1,0 +1,63 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check current status for PRIMARY
+  shell: "{{ crm_mon_command }}"
+  register: primary_output
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+
+- name: Check current status for SECONDARY
+  shell: "{{ crm_mon_command }}"
+  register: secondary_output
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+
+- name: Show primary output
+  debug:
+    msg: "{{ primary_output }}"
+
+- name: Show secondary output
+  debug:
+    msg: "{{ secondary_output }}"
+
+- name: Fail if PRIMARY is not {{ crm_mon_promoted }}
+  fail:
+    msg: "Primary HANA is not in \"{{ crm_mon_promoted }}\" state"
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != "" and not crm_mon_promoted in primary_output.stdout
+  any_errors_fatal: true
+
+- name: Fail if SECONDARY is not {{ crm_mon_demoted }}
+  fail:
+    msg: "Secondary HANA is not in \"{{ crm_mon_demoted }}\" state"
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != "" and not crm_mon_demoted in secondary_output.stdout
+  any_errors_fatal: true
+
+- name: Fail if PRIMARY hana_{{ hana_sid_lower }}_sync_state is not {{ crm_mon_prim }}
+  fail:
+    msg: "Primary hana_{{ hana_sid_lower }}_sync_state is not \"{{ crm_mon_prim }}\""
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != "" and not crm_mon_prim in primary_output.stdout
+  any_errors_fatal: true
+
+- name: Check if hana_{{ hana_sid_lower }}_sync_state is {{ crm_mon_sok }} for SECONDARY, and retries if required by a past failover event
+  shell: "{{ crm_mon_command_grep_sok }}"
+  register: secondary_output
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  failed_when: secondary_output.rc != 0
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: secondary_output.rc == 0
+  any_errors_fatal: true
+
+- name: Get secondary hostname
+  set_fact: custom_hostname="{{ GLOBAL_SECONDARY_PUBLIC_HOSTNAME }}"
+
+- name: Check if counter of PRIMARY is bigger than SECONDARY and retries if required by a past failover event
+  shell: "prim_count=$({{ crm_mon_command }} | tail -1 | sed 's/^.*://'); sec_count=$({{ crm_mon_command_cust_host }} | tail -1 | sed 's/^.*://'); if (( $prim_count > $sec_count )); then exit 0; else exit 1; fi"
+  register: secondary_output
+  failed_when: secondary_output.rc != 0
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: secondary_output.rc == 0
+  any_errors_fatal: true

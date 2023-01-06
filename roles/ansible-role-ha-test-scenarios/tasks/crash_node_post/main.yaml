@@ -1,0 +1,7 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for new SECONDARY instance to be up
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait_secondary_restablish.yaml"

@@ -1,0 +1,23 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get index server index
+  shell: | 
+    source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; {{ get_indexserver_index_command }}
+  register: index_server_index
+  become: true
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+
+- name: Wait for index server to be {{ process_green_status }} again
+  shell: | 
+    source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; {{ get_indexserver_status_command }}
+  register: primary_output
+  failed_when: primary_output.rc != 0
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: primary_output.rc == 0
+  become: true
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  any_errors_fatal: true

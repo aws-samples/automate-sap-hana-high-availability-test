@@ -1,0 +1,22 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Gather AWS info for instances
+  include_tasks: hana/get_aws_info.yaml
+
+- name: Crash primary node
+  include_tasks: hana/crash_primary.yaml
+  when: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+
+- name: Wait for primary node to be in "stopped" state in AWS
+  include_tasks: hana/wait_node_stopped.yaml
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+
+- name: Wait for failover to happen
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait_failover_sec_to_prim.yaml"
+
+- name: Adds restarted instance to HANA group
+  include_tasks: hana/add_new_host.yaml
+  when: GLOBAL_HANA_GROUP_NAME in group_names

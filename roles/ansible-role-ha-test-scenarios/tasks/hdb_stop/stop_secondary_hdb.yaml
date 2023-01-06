@@ -1,0 +1,20 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Stop HDB
+  include_tasks: hana/stop_hdb.yaml
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+
+- name: Check SAP ASCS queue length
+  include_tasks: "{{ role_path }}/tasks/shared/ascs/compare_queue_length.yaml"
+  when: GLOBAL_ASCS_GROUP_NAME in group_names
+
+- name: Start HDB
+  include_tasks: hana/start_hdb.yaml
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+
+- name: Wait for HDB to restablish HA
+  include_tasks: "{{ role_path }}/tasks/shared/hana/wait_secondary_restablish.yaml"
+  when: GLOBAL_HANA_GROUP_NAME in group_names

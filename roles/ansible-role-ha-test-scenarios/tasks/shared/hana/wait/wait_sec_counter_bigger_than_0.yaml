@@ -1,0 +1,17 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Get secondary hostname
+  set_fact: custom_hostname="{{ GLOBAL_SECONDARY_PUBLIC_HOSTNAME }}"
+
+- name: Wait for counter of SECONDARY be bigger than 0
+  shell: "prim_count=$({{ crm_mon_command_cust_host }} | tail -1 | sed 's/^.*://'); zero=0; if (( $prim_count > $zero )); then exit 0; else exit 1; fi"
+  register: secondary_output
+  failed_when: secondary_output.rc != 0
+  when: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: secondary_output.rc == 0
+  any_errors_fatal: true

@@ -1,0 +1,9 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Reboot instance
+  shell: aws ec2 reboot-instances --region {{ GLOBAL_AWS_REGION }} --instance-ids {{ GLOBAL_CRASH_NODE_INSTANCE_ID }} {{ GLOBAL_AWS_CLI_PROFILE | ternary('--profile ' + GLOBAL_AWS_CLI_PROFILE, '', omit) }}
+  delegate_to: localhost
+  run_once: yes

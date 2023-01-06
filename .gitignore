@@ -1,0 +1,7 @@
+hosts_local.yaml
+how_to_run_local.sh
+var_file_local.yaml
+log*.json
+.DS_Store
+.vscode
+__pycache__

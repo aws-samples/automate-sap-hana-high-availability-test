@@ -1,0 +1,21 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check SYNC replication status 
+  include_tasks: check_replication_status.yaml
+
+- name: Check HA configuration status after self-healing actions
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }} && echo "{{ IGNORE_ERRORS }}"
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  when: mode_unknown in output_before.stdout
+  register: output_after
+  ignore_errors: true
+
+- name: Fail if HA setup is not fully active
+  fail:
+    msg: "This installation is not fully configured for HA. Check the output for command {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }} and fix 'Replication status' before trying again"
+  when: output_after is defined and output_after.stdout is defined and not mode_unknown in output_after.stdout
+  any_errors_fatal: true

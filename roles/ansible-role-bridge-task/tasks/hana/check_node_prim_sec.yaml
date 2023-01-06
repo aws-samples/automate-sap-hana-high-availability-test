@@ -1,0 +1,83 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Erase all PRIMARY IPs
+  set_fact: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP=
+
+- name: Erase all SECONDARY IPs
+  set_fact: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST=
+
+- name: Waits for status message if required by a past failover event
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }}
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+  register: output
+  failed_when: not mode_primary_string in output.stdout and not mode_secondary_string in output.stdout
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: mode_primary_string in output.stdout or mode_secondary_string in output.stdout
+  any_errors_fatal: true
+  # no_log: yes
+
+- name: Check if this node is primary
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }} && echo "{{ IGNORE_ERRORS }}"
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  register: output
+  ignore_errors: true
+  # no_log: yes
+
+- name: Register THIS NODE ip as PRIMARY
+  set_fact: GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP={{ ansible_ssh_host }}
+  when: mode_primary_string in output.stdout
+
+- name: Check if this node is secondary
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && cd {{ GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY }} && {{ GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND }} && echo "{{ IGNORE_ERRORS }}"
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  register: output
+  ignore_errors: true
+  # no_log: yes
+
+- name: Register THIS NODE ip as SECONDARY
+  set_fact: GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST={{ ansible_ssh_host }}
+  when: mode_secondary_string in output.stdout
+
+- name: Register primary public HOSTNAME for all nodes
+  set_fact: GLOBAL_PRIMARY_PUBLIC_HOSTNAME="{{ item.value.ansible_hostname }}"
+  when: item.value.GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  loop: "{{ hostvars | dict2items }}"
+  no_log: yes
+
+- name: Register secondary public HOSTNAME for all nodes
+  set_fact: GLOBAL_SECONDARY_PUBLIC_HOSTNAME="{{ item.value.ansible_hostname }}"
+  when: item.value.GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  loop: "{{ hostvars | dict2items }}"
+  no_log: yes
+
+- name: Register primary public IP for all nodes
+  set_fact: GLOBAL_PRIMARY_PUBLIC_IP="{{ item.value.ansible_host }}"
+  when: item.value.GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  loop: "{{ hostvars | dict2items }}"
+  no_log: yes
+
+- name: Register secondary public IP for all nodes
+  set_fact: GLOBAL_SECONDARY_PUBLIC_IP="{{ item.value.ansible_host }}"
+  when: item.value.GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  loop: "{{ hostvars | dict2items }}"
+  no_log: yes
+
+- name: Register primary public INVENTORY_HOSTNAME for all nodes
+  set_fact: GLOBAL_PRIMARY_PUBLIC_INVENTORY_HOSTNAME="{{ item.value.inventory_hostname }}"
+  when: item.value.GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP != ""
+  loop: "{{ hostvars | dict2items }}"
+  no_log: yes
+
+- name: Register secondary public INVENTORY_HOSTNAME for all nodes
+  set_fact: GLOBAL_SECONDARY_PUBLIC_INVENTORY_HOSTNAME="{{ item.value.inventory_hostname }}"
+  when: item.value.GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != ""
+  loop: "{{ hostvars | dict2items }}"
+  no_log: yes

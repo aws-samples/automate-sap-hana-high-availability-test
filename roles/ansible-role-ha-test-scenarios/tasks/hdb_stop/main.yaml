@@ -1,0 +1,12 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Stop primary database
+  include_tasks: stop_primary_hdb.yaml
+  when: LOCAL_STOP_PRIMARY == true
+
+- name: Stop secondary database
+  include_tasks: stop_secondary_hdb.yaml
+  when: LOCAL_STOP_SECONDARY == true

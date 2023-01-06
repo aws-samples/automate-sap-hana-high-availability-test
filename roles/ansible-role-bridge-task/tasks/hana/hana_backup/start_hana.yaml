@@ -1,0 +1,18 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check whether HANA is already started
+  shell: | 
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; HDB proc
+  register: sec_node_stopped
+  become: yes
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+
+- name: Start HANA if it's stopped
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }}; HDB start
+  when: not default_mode_started_hana in sec_node_stopped.stdout
+  become: yes
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"

@@ -1,0 +1,86 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
+
+ansible_ssh_timeout: 300
+
+# Infrastructure data
+GLOBAL_HANA_PRIMARY_NODE_PRIVATE_IP: ""
+GLOBAL_HANA_PRIMARY_NODE_PUBLIC_IP: ""
+GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST: ""
+GLOBAL_HANA_SECONDARY_NODES_PUBLIC_IP_LIST: ""
+
+# Installation data
+GLOBAL_HANA_SID: "{{ INPUT_HANA_SID | upper }}"
+GLOBAL_HANA_INSTANCE_NUMBER: "{{ INPUT_HANA_INSTANCE_NUMBER }}"
+GLOBAL_HANA_SID_ADM_USER: "{{ GLOBAL_HANA_SID | lower }}adm"
+
+# HA data
+GLOBAL_HANA_SYNC_MODE: "{{ INPUT_HANA_SYNC_MODE | default('sync') | lower }}"
+GLOBAL_MAXIMUM_WAIT_TIME_FAILOVER: "{{ INPUT_MAXIMUM_WAIT_TIME_FAILOVER | default('1200') }}"
+GLOBAL_DEFAULT_DELAY_RETRY: "{{ 5 | int }}"
+GLOBAL_INSTANCE_START_DELAY: "{{ 30 | int }}"
+GLOBAL_RETRY_TIME: "{{ ((GLOBAL_MAXIMUM_WAIT_TIME_FAILOVER | int) / (GLOBAL_DEFAULT_DELAY_RETRY | int)) | int }}"
+
+# Credentials
+GLOBAL_HANA_SYSTEM_USER: "{{ INPUT_SYSTEM_USER | default('SYSTEM') }}"
+GLOBAL_HANA_SYSTEM_PASSWORD: "{{ INPUT_SYSTEM_PASSWORD }}"
+
+# HANA Paths
+GLOBAL_HANA_HOME_PATH: /usr/sap/{{ GLOBAL_HANA_SID }}/home
+GLOBAL_HANA_HDB_PATH: /usr/sap/{{ GLOBAL_HANA_SID }}/HDB{{ GLOBAL_HANA_INSTANCE_NUMBER }}
+GLOBAL_HANA_SHARED_FOLDER: "{{ INPUT_HANA_SHARED_FOLDER | default('/hana/shared') }}"
+GLOBAL_HANA_SAPENV_CUSTOM_PATH: "{{ GLOBAL_HANA_HOME_PATH }}/.sapenv-ansible.sh"
+GLOBAL_HANA_HANA_PATH_CDPY_DIRECTORY: "{{ GLOBAL_HANA_HDB_PATH }}/exe/python_support"
+
+# HANA Commands:
+GLOBAL_SYSTEM_REPLICATION_STATUS_COMMAND: "python systemReplicationStatus.py"
+
+# ASCS installation data
+GLOBAL_ASCS_SID: "{{ INPUT_ASCS_SID | upper }}"
+GLOBAL_ASCS_INSTANCE_NUMBER: "{{ INPUT_ASCS_INSTANCE_NUMBER }}"
+GLOBAL_ASCS_SID_ADM_USER: "{{ GLOBAL_ASCS_SID | lower }}adm"
+
+# ASCS Paths
+GLOBAL_ASCS_SAPENV_CUSTOM_PATH: "/home/{{ GLOBAL_HANA_SID | lower }}adm/.sapenv-ansible.sh"
+
+# PAS Paths
+GLOBAL_PAS_SAPENV_CUSTOM_PATH: "/home/{{ GLOBAL_PAS_SID | lower }}adm/.sapenv-ansible.sh"
+GLOBAL_PAS_SAPDBENV_PATH: "/home/{{ GLOBAL_PAS_SID | lower }}adm/.dbenv.sh"
+GLOBAL_PAS_R3TRANS_FILE_FOLDER: "/home/{{ GLOBAL_PAS_SID | lower }}adm"
+GLOBAL_PAS_R3TRANS_FILE_PATH: "{{ GLOBAL_PAS_R3TRANS_FILE_FOLDER }}/trans.log"
+
+# ASCS runtime data
+GLOBAL_ASCS_ENQUEUE_COUNT_PRE: "0"
+GLOBAL_ASCS_ENQUEUE_COUNT_POST: "0"
+
+# ASCS params
+GLOBAL_ASCS_MAXIMUM_DRIFT: "{{ INPUT_ASCS_MAXIMUM_DRIFT | default('5') }}"
+
+# PAS installation data:
+GLOBAL_PAS_SID: "{{ INPUT_PAS_SID | upper }}"
+GLOBAL_PAS_INSTANCE_NUMBER: "{{ INPUT_PAS_INSTANCE_NUMBER }}"
+GLOBAL_PAS_SID_ADM_USER: "{{ GLOBAL_PAS_SID | lower }}adm"
+
+# PAS verifications
+GLOBAL_CHECK_R3_TRANS: "{{ INPUT_CHECK_R3_TRANS | default(true) }}"
+
+# Instance group names
+GLOBAL_HANA_GROUP_NAME: "hana"
+GLOBAL_ASCS_GROUP_NAME: "ascs"
+GLOBAL_PAS_GROUP_NAME: "pas"
+
+# Hosts default values
+GLOBAL_EC2_USER: "{{ INPUT_EC2_USER | default('ec2-user') }}"
+GLOBAL_SSH_PORT: "{{ INPUT_SSH_PORT | default('22') }}"
+GLOBAL_SSH_CONNECTION: "{{ INPUT_SSH_CONNECTION | default('ssh') }}"
+GLOBAL_SSH_COMMON_ARGS: "{{ INPUT_SSH_COMMON_ARGS | default('-o StrictHostKeyChecking=no -o ServerAliveInterval=30 -o ControlMaster=auto -o ControlPersist=60s') }}"
+GLOBAL_SSH_PRIVATE_KEY: "{{ INPUT_PRIVATE_SSH_KEY }}"
+
+# AWS data
+GLOBAL_AWS_REGION: "{{ INPUT_AWS_REGION | default('us-east-1') }}"
+
+# AWS CLI data
+GLOBAL_AWS_CLI_PROFILE: "{{ INPUT_AWS_CLI_PROFILE }}"

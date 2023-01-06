@@ -1,0 +1,98 @@
+<!-- 
+    Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+    SPDX-License-Identifier: MIT-0 
+-->
+
+{{ define "message_cell" }}
+<div>
+    <h6>{{ .NAME }}</h6>
+    {{ range .HOSTS_STATE }}
+        {{ if .ACTION_NAME }}
+            {{ if eq "false" .SKIPPED }}
+            
+                {{ if eq "true" .FAILED }}
+                    <details open style="background-color: #FFCCCB;">
+                {{ else }}
+                    <details>
+                {{ end }}
+                    
+                        <summary><h7>{{ .HOST_NAME }}: {{ .ACTION_NAME }} - Changed: {{ .CHANGED }}</h7></summary>
+                    
+                        {{ if .CMD }}
+                            {{ if eq "true" .FAILED }}
+                                <details open>
+                            {{ else }}
+                                <details>
+                            {{ end }}
+                                <summary>Command details</summary>
+                                <h8 class="highlight-title-detail">Command: </h8>{{ .CMD }}
+                                <br><h8 class="highlight-title-detail">Start date: </h8>{{ .STARTDATE }}
+                                <br><h8 class="highlight-title-detail">End date: </h8>{{ .ENDDATE }}
+                                {{ if .ATTEMPTS }}
+                                    <br><h8 class="highlight-title-detail">Task duration: </h8>{{ .ATTEMPTS }}
+                                {{ end }}
+                                
+                                <br><h8 class="highlight-title-detail">Errors: </h8>
+                                {{ range .STDERR_LINES }}
+                                    <br><nobr><h8>{{ . }}</h8></nobr>
+                                {{ end }}
+                                
+                                <br><h8 class="highlight-title-detail">Standard output:</h8>
+                                {{ range .STDOUT_LINES }}
+                                    <br><nobr><h8>{{ . }}</h8></nobr>
+                                {{ end }}
+                            </details>
+                        {{ end }}
+
+                        {{ if .MSG }}
+                        {{ if eq "true" .FAILED }}
+                            <details open>
+                        {{ else }}
+                            <details>
+                        {{ end }}
+                                <summary>See full message</summary>
+                                {{ range .MSG }}
+                                    <br><h7>{{ . }}</h7>
+                                {{ end }}
+                            </details>
+                        {{ end }}
+
+                        {{ if .ANSIBLE_FACTS.ANSIBLE_DOMAIN }}
+                        <details open>
+                            <summary>Instance state details</summary>
+
+                                {{ if .ANSIBLE_FACTS.ANSIBLE_ENV.HOME }}
+                                    <details>
+                                        <summary>Environment variables</summary>
+                                        <h8 class="margin-left-1">HOME: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.HOME }}</h8>
+                                        <br><h8 class="margin-left-1">PATH: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.PATH }}</h8>
+                                        <br><h8 class="margin-left-1">SUDO_GID: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.SUDO_GID }}</h8>
+                                        <br><h8 class="margin-left-1">TERM: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.TERM }}</h8>
+                                        <br><h8 class="margin-left-1">USER: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.USER }}</h8>
+                                        <br><h8 class="margin-left-1">SUDO_UID: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.SUDO_UID }}</h8>
+                                        <br><h8 class="margin-left-1">LOGNAME: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.LOGNAME }}</h8>
+                                        <br><h8 class="margin-left-1">PWD: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.PWD }}</h8>
+                                        <br><h8 class="margin-left-1">SUDO_COMMAND: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.SUDO_COMMAND }}</h8>
+                                        <br><h8 class="margin-left-1">SHELL: {{ .ANSIBLE_FACTS.ANSIBLE_ENV.SHELL }}</h8>
+                                    </details>
+                                {{ end }}
+
+                                {{ if .ANSIBLE_FACTS.ANSIBLE_DOMAIN }}
+                                    <h8>ansible_all_ipv4_addresses: {{ .ANSIBLE_FACTS.ANSIBLE_ALL_IPV4_ADDRESSES }}</h8>
+                                    <br><h8>ansible_all_ipv6_addresses: {{ .ANSIBLE_FACTS.ANSIBLE_ALL_IPV6_ADDRESSES }}</h8>
+                                    <br><h8>ansible_distribution: {{ .ANSIBLE_FACTS.ANSIBLE_DISTRIBUTION }}</h8>
+                                    <br><h8>ansible_domain: {{ .ANSIBLE_FACTS.ANSIBLE_DOMAIN }}</h8>
+                                    <br><h8>ansible_fqdn: {{ .ANSIBLE_FACTS.ANSIBLE_FQDN }}</h8>
+                                    <br><h8>ansible_hostname: {{ .ANSIBLE_FACTS.ANSIBLE_HOSTNAME }}</h8>
+                                    <br><h8>ansible_nodename: {{ .ANSIBLE_FACTS.ANSIBLE_NODE_NAME }}</h8>
+                                    <br><h8>ansible_os_family: {{ .ANSIBLE_FACTS.ANSIBLE_OS_FAMILY }}</h8>
+                                {{ end }}
+                        </details>
+                        {{ end }}
+                    </details>
+            {{ end }}
+            <br>
+        {{ end }}
+    {{ end }}
+</div>
+{{ end }}

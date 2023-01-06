@@ -1,0 +1,13 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Wait for SECONDARY to be PROMOTED
+  include_tasks: wait/wait_secondary_be_promoted.yaml
+
+- name: Wait for SECONDARY to be PRIM
+  include_tasks: wait/wait_secondary_be_prim.yaml
+
+- name: Wait for SECONDARY counter to be bigger than 0
+  include_tasks: wait/wait_sec_counter_bigger_than_0.yaml

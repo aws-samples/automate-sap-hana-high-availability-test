@@ -1,0 +1,16 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check if HANA is fully up on both nodes with GetProcessList. Waits for it to be up if required by a past failover event
+  shell: |
+    source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && {{ command_get_process_list }}
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  register: process_list_output
+  when: GLOBAL_HANA_GROUP_NAME in group_names
+  failed_when: (process_list_output.stdout | int) > 0
+  retries: "{{ GLOBAL_RETRY_TIME }}"
+  delay: "{{ GLOBAL_DEFAULT_DELAY_RETRY }}"
+  until: (process_list_output.stdout | int) == 0
+  any_errors_fatal: true

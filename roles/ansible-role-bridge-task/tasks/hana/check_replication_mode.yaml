@@ -1,0 +1,46 @@
+---
+
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0 
+
+- name: Check replication status
+  shell: |
+      source {{ GLOBAL_HANA_SAPENV_CUSTOM_PATH }} && hdbnsutil -sr_state
+  become_user: "{{ GLOBAL_HANA_SID_ADM_USER }}"
+  register: output
+
+- name: Print current replication status
+  debug:
+    msg: "{{ output.stdout_lines }}"
+
+# Instructions for replication mode SYNC
+- name: Check if replication status is SYNC
+  debug:
+    msg: "Replication status found is above. It should be {{ GLOBAL_HANA_SYNC_MODE | upper }} according to input parameters. Will attempt to update"
+  when:
+    - GLOBAL_HANA_SYNC_MODE == sync_replication_mode
+    - replication_mode_hostname_syncmem in output.stdout
+
+- name: Update replication mode to be SYNC if needed
+  include_tasks: update_replication_mode.yaml
+  when: 
+    - GLOBAL_HANA_SYNC_MODE == sync_replication_mode
+    - replication_mode_hostname_syncmem in output.stdout
+    - GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != "" 
+
+# Instructions for replciation mode SYNCMEM
+- name: Check if replication status is SYNCMEM
+  debug:
+    msg: "Replication status found is above. It should be {{ GLOBAL_HANA_SYNC_MODE | upper }} according to input parameters. Will attempt to update"
+  when:
+    - GLOBAL_HANA_SYNC_MODE == syncmem_replication_mode
+    - replication_mode_hostname_sync in output.stdout
+    - not replication_mode_hostname_syncmem in output.stdout
+
+- name: Update replication mode to be SYNCMEM if needed
+  include_tasks: update_replication_mode.yaml
+  when: 
+    - GLOBAL_HANA_SYNC_MODE == syncmem_replication_mode
+    - replication_mode_hostname_sync in output.stdout
+    - not replication_mode_hostname_syncmem in output.stdout
+    - GLOBAL_HANA_SECONDARY_NODES_PRIVATE_IP_LIST != "" 
