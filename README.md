@@ -11,8 +11,7 @@ SAP Software covered with this code:
 * SAP HANA - SAP In-Memory Database - verion 1909 - running on RedHat
 
 You can check how to use this repo on this blog post: <insert blog post here>
-
-![](readme_pictures/html-report-sample.png)
+![](readme_pictures/report_sample.png)
 
 ## Pre requirements for running this code
 <ol>
