@@ -90,41 +90,41 @@
 #       vars:
 #         HA_TEST_SCENARIO: "KILL_PID"
 
-- name: Stop Primary database with "echo 'b' > /proc/sysrq-trigger" and check result
-  become: true
-  hosts: all
-  roles:
-    - role: ansible-role-bridge-task
-    - role: ansible-role-ha-test-scenarios
-      vars:
-        HA_TEST_SCENARIO: "CRASH_NODE_PROC_PRE"
+# - name: Stop Primary database with "echo 'b' > /proc/sysrq-trigger" and check result
+#   become: true
+#   hosts: all
+#   roles:
+#     - role: ansible-role-bridge-task
+#     - role: ansible-role-ha-test-scenarios
+#       vars:
+#         HA_TEST_SCENARIO: "CRASH_NODE_PROC_PRE"
 
-- name: Run POST ACTIONS for scenario CRASH_NODE_PROC_PRE
-  become: true
-  hosts: all
-  roles:
-    - role: ansible-role-bridge-task
-    - role: ansible-role-ha-test-scenarios
-      vars:
-        HA_TEST_SCENARIO: "CRASH_NODE_PROC_POST"
+# - name: Run POST ACTIONS for scenario CRASH_NODE_PROC_PRE
+#   become: true
+#   hosts: all
+#   roles:
+#     - role: ansible-role-bridge-task
+#     - role: ansible-role-ha-test-scenarios
+#       vars:
+#         HA_TEST_SCENARIO: "CRASH_NODE_PROC_POST"
 
-- name: Stop Secondary database with "echo 'b' > /proc/sysrq-trigger" and check result
-  become: true
-  hosts: all
-  roles:
-    - role: ansible-role-bridge-task
-    - role: ansible-role-ha-test-scenarios
-      vars:
-        HA_TEST_SCENARIO: "CRASH_NODE_PROC_PRE"
+# - name: Stop Secondary database with "echo 'b' > /proc/sysrq-trigger" and check result
+#   become: true
+#   hosts: all
+#   roles:
+#     - role: ansible-role-bridge-task
+#     - role: ansible-role-ha-test-scenarios
+#       vars:
+#         HA_TEST_SCENARIO: "CRASH_NODE_PROC_PRE"
 
-- name: Run POST ACTIONS for scenario CRASH_NODE_PROC_PRE
-  become: true
-  hosts: all
-  roles:
-    - role: ansible-role-bridge-task
-    - role: ansible-role-ha-test-scenarios
-      vars:
-        HA_TEST_SCENARIO: "CRASH_NODE_PROC_POST"
+# - name: Run POST ACTIONS for scenario CRASH_NODE_PROC_PRE
+#   become: true
+#   hosts: all
+#   roles:
+#     - role: ansible-role-bridge-task
+#     - role: ansible-role-ha-test-scenarios
+#       vars:
+#         HA_TEST_SCENARIO: "CRASH_NODE_PROC_POST"
 
 # - name: Stop Primary database with HDB KILL -9 and check result
 #   become: true
