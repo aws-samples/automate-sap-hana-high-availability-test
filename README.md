@@ -5,12 +5,14 @@ Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
 ```
 
-This is an open source repo with sample code to automate the High Availability testing for SAP HANA. This can be either run alone or integrated with the previous solution provided by this team [Install SAP With Jenkins and Ansible](https://github.com/aws-samples/aws-install-sap-with-jenkins-ansible/). In the end it generates an HTML report presenting all the finds and successes/failures of the run. Example below.
+This is an open source repo with sample code to automate the High Availability testing for SAP HANA. This can be either run alone or integrated with the previous solution provided by this team [Install SAP With Jenkins and Ansible](https://github.com/aws-samples/aws-install-sap-with-jenkins-ansible/). 
 
 SAP Software covered with this code:
 * SAP HANA - SAP In-Memory Database - verion 1909 - running on RedHat
 
-You can check how to use this repo on this blog post: <insert blog post here>
+You can check more details on how to use this repo on this blog post: <insert blog post here>
+
+In the end of the execution, this solution generates an HTML report presenting all the finds and successes/failures of the run. Example below:
 ![](readme_pictures/report_sample.png)
 
 ## Pre requirements for running this code
