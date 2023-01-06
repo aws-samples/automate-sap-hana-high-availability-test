@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-FOLDER_PATH="./jenkins-pipelines/sap-pipeline-hana-pas-ascs/stages/env_states"
+FOLDER_PATH="./jenkins/stages/env_states"
 
 # Check S3 bucket for storing TF states
 $FOLDER_PATH/check_create_env_bucket.sh
