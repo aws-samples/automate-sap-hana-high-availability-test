@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-FOLDER_PATH="./jenkins-pipelines/sap-pipeline-hana-pas-ascs/stages/prepare/check_aws_resources"
+FOLDER_PATH="./jenkins/stages/prepare/check_aws_resources"
 
 # Check KeyPair
 $FOLDER_PATH/check_key_pair.sh

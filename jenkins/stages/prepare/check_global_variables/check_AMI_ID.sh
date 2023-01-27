@@ -4,11 +4,12 @@
 # SPDX-License-Identifier: MIT-0
 
 # ------------------------------------------------------------------
-# Install Ansible Galaxy dependencies
+# Check if the variable is present. If not, send back default value
 # ------------------------------------------------------------------
-ansible-galaxy collection install amazon.aws
-
-if [ $? -ne 0 ]; then
-    echo "There was an error while installing AWS dependencies for Ansible. Please try again"
-    exit 101
+if [ -z "$AMI_ID" ]; then
+    echo "Invalid AMI ID. Check your AMI Id on AWS Marketplace > RHEL 8.2"
+    exit 100
 fi
+
+echo "$AMI_ID"
+exit 0

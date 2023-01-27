@@ -19,7 +19,7 @@ if [ $? -ne 0 ]; then
 fi
 
 terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" \
-                plan \
+                refresh \
                 -var "aws_access_key=$AWS_ACCOUNT_CREDENTIALS_USR" \
                 -var "aws_secret_key=$AWS_ACCOUNT_CREDENTIALS_PSW" \
                 -var "aws_region=$AWS_REGION_CHKD" \
@@ -37,21 +37,9 @@ terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" \
                 -var "customer_default_sg_id=$SECURITY_GROUP_ID_CHKD" \
                 -var "enable_ha=$ENABLE_HA_CHKD" \
                 -var "ami_id=$AMI_ID_CHKD" \
-                -var "kms_key_arn=$KMS_KEY_ARN" \
-                -out "tfout.log" \
-                > /dev/null
+                -var "kms_key_arn=$KMS_KEY_ARN"
 
 if [ $? -ne 0 ]; then
-    echo "Error with Terraform Plan. Please check again"
+    echo "Error with Terraform Refresh. Please check again"
     exit 101
-fi
-
-terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" \
-                apply \
-                -lock-timeout=10m \
-                "tfout.log"
-
-if [ $? -ne 0 ]; then
-    echo "Error with Terraform Apply. Please check again"
-    exit 102
 fi

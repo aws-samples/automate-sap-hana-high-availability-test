@@ -4,11 +4,12 @@
 # SPDX-License-Identifier: MIT-0
 
 # ------------------------------------------------------------------
-# Install Ansible Galaxy dependencies
+# Check if the variable is present. If not, send back default value
 # ------------------------------------------------------------------
-ansible-galaxy collection install amazon.aws
-
-if [ $? -ne 0 ]; then
-    echo "There was an error while installing AWS dependencies for Ansible. Please try again"
-    exit 101
+if [ -z "$ENABLE_HA" ]; then
+    echo "true"
+    exit 0
 fi
+
+echo "$ENABLE_HA"
+exit 0

@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: MIT-0
 
-ansibleHanaDir="$PWD/ansible-playbooks/aws-sap-hana"
+ansibleHanaDir="$PWD"
 export ANSIBLE_DIR=$ansibleHanaDir
 
 # ------------------------------------------------------------------
@@ -16,14 +16,14 @@ if [ -z "$hana_public_ips" ]; then
 fi
 export HOSTS_IPS=$hana_public_ips
 
-ascs_private_ip=$(terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" output -json ascs_instance_public_ips | jq -r '.[0]')
-if [ -z "$ascs_private_ip" ]; then
+ascs_public_ip=$(terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" output -json ascs_instance_public_ips | jq -r '.[0]')
+if [ -z "$ascs_public_ip" ]; then
     echo "No ASCS instance IP was found. Please check Terraform step"
     exit 101
 fi
 
-pas_private_ip=$(terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" output -json app_instance_public_ips | jq -r '.[0]')
-if [ -z "$pas_private_ip" ]; then
+pas_public_ip=$(terraform -chdir="$PWD/$TERRAFORM_FOLDER_NAME" output -json app_instance_public_ips | jq -r '.[0]')
+if [ -z "$pas_public_ip" ]; then
     echo "No PAS instance IP was found. Please check Terraform step"
     exit 102
 fi
@@ -74,7 +74,7 @@ ANSIBLE_BECOME_EXE="sudo su -"
 
 rm -f log.json
 
-ansible-playbook $ansibleHanaDir/install_hana.yml \
+ansible-playbook $ansibleHanaDir/main.yaml \
                     --inventory-file "$hostsFile" \
                     --extra-vars "@$VAR_FILE_FULL_PATH"
 

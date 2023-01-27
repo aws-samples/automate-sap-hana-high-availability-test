@@ -9,6 +9,7 @@ import (
 	"html/template"
 	"os"
 	"reports/model"
+	"time"
 )
 
 func buildReport(ansibleLog model.AnsibleLog) string {
@@ -49,7 +50,8 @@ func getTemplateFiles() []string {
 func ExportToHTML(ansibleLog model.AnsibleLog) {
 	htmlData := buildReport(ansibleLog)
 
-	os.WriteFile("report.html", []byte(htmlData), 0644)
+	dt := time.Now()
+	os.WriteFile("report-"+dt.Format(time.RFC3339)+".html", []byte(htmlData), 0644)
 }
 
 func check(e error) {

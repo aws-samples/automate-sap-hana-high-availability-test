@@ -6,3 +6,4 @@ log*.json
 .vscode
 __pycache__
 report.html
+report-*.html
